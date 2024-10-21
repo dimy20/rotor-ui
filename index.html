@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcular Rotor de un Campo Vectorial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300&family=Cinzel&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-image: url(imagen.png/fondo_galactico.png);
+            background-size: cover;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
+            width: 400px;
+            text-align: center;
+        }
+        h2 {
+            font-family: 'Roboto', sans-serif;
+        }
+        input {
+            width: 90%;
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 16px;
+        }
+        input::placeholder {
+            color: #bbb;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #fff;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        button:hover {
+            background-color: #ccc;
+        }
+        .result {
+            margin-top: 25px;
+            font-size: 20px;
+        }
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            color: black;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Calcular Rotor</h2>
+    <p>Introduce los valores de la función F(x, y, z)</p>
+    
+    <input type="text" id="fx_value" placeholder="F(x) (ej: sin(y))">
+    <input type="text" id="fy_value" placeholder="F(y) (ej: cos(z))">
+    <input type="text" id="fz_value" placeholder="F(z) (ej: tan(x))">
+    
+    <button onclick="calcularRotor()">Calcular Rotor</button>
+    
+    <div class="result" id="result"></div>
+</div>
+
+<div class="footer">
+    <p>Creado por: Enzo Escobar y Belen Pereira</p>
+</div>
+
+<script>
+    function calcularRotor() {
+        const fx = document.getElementById('fx_value').value;
+        const fy = document.getElementById('fy_value').value;
+        const fz = document.getElementById('fz_value').value;
+
+        if (!fx || !fy || !fz) {
+            document.getElementById('result').textContent = 'Por favor ingresa todas las componentes.';
+            return;
+        }
+
+        // Aquí hacemos la solicitud POST a la API con fetch
+        fetch("https://modest-tandie-utec-fast-0bcfbfcf.koyeb.app/compute_curl", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                Fx: fx,
+                Fy: fy,
+                Fz: fz
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const curl = data.curl;
+
+// Formato del rotor como (xi + yj + zk)
+const curlFormatted = `${curl[0]}i + ${curl[1]}j + ${curl[2]}k`;
+
+// Mostramos el resultado del rotor en el formato correcto con salto de línea
+document.getElementById('result').innerHTML = `Resultado del rotor: ${curlFormatted}<br>`;
+
+// Verificamos si el rotor es un vector nulo
+if (curl[0] === "0" && curl[1] === "0" && curl[2] === "0") {
+    document.getElementById('result').innerHTML += "El campo puede ser conservativo.";
+} else {
+    document.getElementById('result').innerHTML += "El campo no es conservativo.";
+}
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('result').textContent = 'Hubo un error en la solicitud.';
+        });
+    }
+</script>
+
+</body>
+</html>
