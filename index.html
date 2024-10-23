@@ -23,14 +23,15 @@
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
-            width: 400px;
+            width: 100%;
+            max-width: 400px;
             text-align: center;
         }
         h2 {
             font-family: 'Roboto', sans-serif;
         }
         input {
-            width: 90%;
+            width: 100%; 
             padding: 15px;
             margin: 12px 0;
             border-radius: 8px;
@@ -38,6 +39,7 @@
             background-color: rgba(255, 255, 255, 0.2);
             color: #fff;
             font-size: 16px;
+            box-sizing: border-box; 
         }
         input::placeholder {
             color: #bbb;
@@ -50,6 +52,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 18px;
+            width: 100%; 
         }
         button:hover {
             background-color: #ccc;
@@ -70,6 +73,31 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
         }
+
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+            button {
+                padding: 12px;
+            }
+            input {
+                font-size: 14px;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .container {
+                width: 80%;
+            }
+        }
+
+        .loading {
+            font-size: 16px;
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +112,7 @@
     
     <button onclick="calcularRotor()">Calcular Rotor</button>
     
+    <div class="loading" id="loading">Cargando...</div>
     <div class="result" id="result"></div>
 </div>
 
@@ -102,7 +131,9 @@
             return;
         }
 
-        // Aquí hacemos la solicitud POST a la API con fetch
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result').textContent = ''; 
+
         fetch("https://modest-tandie-utec-fast-0bcfbfcf.koyeb.app/compute_curl", {
             method: 'POST',
             headers: {
@@ -118,22 +149,23 @@
         .then(data => {
             const curl = data.curl;
 
-// Formato del rotor como (xi + yj + zk)
-const curlFormatted = `${curl[0]}i + ${curl[1]}j + ${curl[2]}k`;
+            const curlFormatted = `${curl[0]}i + ${curl[1]}j + ${curl[2]}k`;
 
-// Mostramos el resultado del rotor en el formato correcto con salto de línea
-document.getElementById('result').innerHTML = `Resultado del rotor: ${curlFormatted}<br>`;
+            document.getElementById('result').innerHTML = `Resultado del rotor: ${curlFormatted}<br>`;
 
-// Verificamos si el rotor es un vector nulo
-if (curl[0] === "0" && curl[1] === "0" && curl[2] === "0") {
-    document.getElementById('result').innerHTML += "El campo puede ser conservativo.";
-} else {
-    document.getElementById('result').innerHTML += "El campo no es conservativo.";
-}
+            if (curl[0] === "0" && curl[1] === "0" && curl[2] === "0") {
+                document.getElementById('result').innerHTML += "El campo puede ser conservativo.";
+            } else {
+                document.getElementById('result').innerHTML += "El campo no es conservativo.";
+            }
+
+            document.getElementById('loading').style.display = 'none';
         })
         .catch(error => {
             console.error('Error:', error);
             document.getElementById('result').textContent = 'Hubo un error en la solicitud.';
+
+            document.getElementById('loading').style.display = 'none';
         });
     }
 </script>
